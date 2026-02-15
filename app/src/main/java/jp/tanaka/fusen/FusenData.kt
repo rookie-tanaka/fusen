@@ -1,3 +1,3 @@
 package jp.tanaka.fusen
 
-data class FusenData()
+data class FusenData(val number: String, val lastUpdated: Long)
