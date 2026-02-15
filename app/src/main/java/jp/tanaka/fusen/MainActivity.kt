@@ -1,20 +1,28 @@
 package jp.tanaka.fusen
 
+import android.os.Build
 import android.os.Bundle
+import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.InputTransformation.Companion.keyboardOptions
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -38,6 +46,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun FusenApp() {
     val context = LocalContext.current
@@ -54,14 +63,17 @@ fun FusenApp() {
         }
     )
 
+    // collectAsStateでUiStateを受け取る
+    val uiState by viewModel.uiState.collectAsState()
+
     FusenScreen(
-        memo = viewModel.memoState.collectAsState().value,
+        uiState = uiState,
         onValueChange = viewModel::onNumberChanged,
     )
 }
 
 @Composable
-fun FusenScreen(memo: String, onValueChange: (String) -> Unit) {
+fun FusenScreen(uiState: FusenUiState, onValueChange: (String) -> Unit) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Box(
             modifier = Modifier
@@ -70,12 +82,25 @@ fun FusenScreen(memo: String, onValueChange: (String) -> Unit) {
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            OutlinedTextField(
-                value = memo,
-                onValueChange = onValueChange,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                OutlinedTextField(
+                    value = uiState.number,
+                    onValueChange = onValueChange,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = uiState.daysPassedText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
         }
     }
 }
